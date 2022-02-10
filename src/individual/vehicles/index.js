@@ -1,0 +1,89 @@
+import express from "express";
+import { ModelIndividualUser } from "../db-model/model.individual.users";
+//import { ModelVehicles } from "../db-model/model.vehicle.users";
+import { ModelSubscription } from "../db-model/model.subscription";
+import authenticateToken from "../middleware/authenticate";
+import multerS3 from "multer-s3";
+import multer from "multer";
+import { s3 } from "../../shared/s3";
+import { ModelVehicles } from "../db-model/model.vehicle";
+require("dotenv").config();
+
+const vehicleApp = express.Router();
+
+vehicleApp.use(express.json());
+const uploadVehicle = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.AWS_S3_BUCKET_NAME,
+    key: function (req, file, cb) {
+      var newFileName = Date.now() + "-" + file.originalname;
+      var fullPath = "vehicle/" + newFileName;
+      cb(null, fullPath); //use Date.now() for unique file keys
+    },
+  }),
+});
+
+vehicleApp.get("/", async (req, res) => {
+  try {
+    const vehicles = await ModelVehicles.collection().find({}).toArray();
+    return res.json({ status: "ok", data: vehicles });
+  } catch (e) {
+    console.log(e);
+    return res.json({ status: "ok", msg: "Server error" });
+  }
+});
+
+vehicleApp.post("/", uploadVehicle.single("image"), async (req, res) => {
+  const { name, status, color } = req.body;
+  try {
+    await ModelVehicles.collection().insertOne({
+      id: `CWV-${Math.floor(1000000000000000 + Math.random() * 9000000000000)}`,
+      name,
+      created: new Date(),
+      status,
+      color,
+      image: req.file.location,
+    });
+    return res.json({ staus: "ok", msg: "Added" });
+  } catch (e) {
+    console.log(e);
+    return res.json({ staus: "failed", msg: "Server error" });
+  }
+});
+
+vehicleApp.patch("/", uploadVehicle.single("image"), async (req, res) => {
+  const { name, color, id } = req.body;
+  const params = req.file?.location
+    ? req.file.location?.length > 0
+      ? { name, color, image: req.file.location }
+      : { name, color }
+    : { name, color };
+  try {
+    await ModelVehicles.collection().updateOne(
+      { id },
+      {
+        $set: params,
+      },
+      { upsert: false }
+    );
+    return res.json({ staus: "ok", msg: "Edited" });
+  } catch (e) {
+    console.log(e);
+    return res.json({ staus: "failed", msg: "Server error" });
+  }
+});
+
+vehicleApp.delete("/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  try {
+    await ModelVehicles.collection().deleteOne({ id });
+    return res.json({ staus: "ok", msg: "Deleted" });
+  } catch (e) {
+    console.log(e);
+    return res.json({ staus: "failed", msg: "Server error" });
+  }
+});
+
+export { vehicleApp };

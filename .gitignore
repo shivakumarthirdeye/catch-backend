@@ -1,0 +1,8 @@
+/build
+/node_modules
+/tmp
+/upload
+*.map
+*.pem
+*.log
+package-lock.json
