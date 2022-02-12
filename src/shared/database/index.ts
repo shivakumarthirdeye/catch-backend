@@ -1,4 +1,4 @@
-import { ModelIndividualUser } from "./../../individual/db-model/model.individual.users";
+import { ModelIndividualUser } from "../../individual/db-model/model.individual.users";
 import { MongoClient, Db } from "mongodb";
 import { loggerRoot } from "../logger";
 

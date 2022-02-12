@@ -18,6 +18,7 @@ export interface IIndividualUser {
   short_address: string;
   full_address: string;
   status: string;
+  vehicle_name: string;
   active: Date;
   email: string;
 }

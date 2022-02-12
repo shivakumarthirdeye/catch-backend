@@ -86,6 +86,7 @@ userApp.post(
       vehicle_type,
       latitude,
       longitude,
+      vehicle_name,
     } = req.body;
 
     let extra_params = {};
@@ -115,6 +116,7 @@ userApp.post(
               updated: new Date(),
               full_address,
               vehicle_type,
+              vehicle_name,
               coordinates: {
                 type: "Point",
                 coordinates: [parseFloat(longitude), parseFloat(latitude)],
@@ -150,6 +152,20 @@ userApp.post("/local", authenticateToken, async (req, res) => {
             distanceField: "dist.calculated",
             includeLocs: "dist.location",
             spherical: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "Vehicles",
+            localField: "vehicle_type",
+            foreignField: "id",
+            as: "category",
+          },
+        },
+        {
+          $unwind: {
+            path: "$category",
+            preserveNullAndEmptyArrays: true,
           },
         },
       ])
