@@ -55,6 +55,7 @@ authApp.post("/register", async (req, res) => {
       full_address: "",
       short_address: "",
       vehicle_name: "",
+      vehicle_images: [],
       coordinates: {
         type: "Point",
         coordinates: [26.0, 76.0],

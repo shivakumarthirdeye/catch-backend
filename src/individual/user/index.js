@@ -5,6 +5,7 @@ import authenticateToken from "../middleware/authenticate";
 import multerS3 from "multer-s3";
 import multer from "multer";
 import { s3 } from "../../shared/s3";
+import { ModelVehicles } from "../db-model/model.vehicle";
 require("dotenv").config();
 
 const userApp = express.Router();
@@ -46,7 +47,14 @@ userApp.get("/", authenticateToken, async (req, res) => {
       user_id: id,
     });
 
-    return res.json({ status: "ok", data: { ...user, ...user_sub } });
+    const vehicle_type = await ModelVehicles.collection().findOne({
+      id: user.vehicle_type,
+    });
+
+    return res.json({
+      status: "ok",
+      data: { ...user, ...user_sub, vehicle_data: vehicle_type },
+    });
   } catch (e) {
     console.log(e);
     return res.json({ status: "ok", msg: "Server error" });
