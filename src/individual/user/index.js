@@ -86,20 +86,10 @@ userApp.post(
   uploadProfile.single("profile_image"),
   async (req, res) => {
     const id = req.user.id;
-    const {
-      username,
-      email,
-      short_address,
-      full_address,
-      vehicle_type,
-      latitude,
-      longitude,
-      vehicle_name,
-    } = req.body;
 
     let extra_params = {};
 
-    if (req.file.location && req.file.location?.length > 0) {
+    if (req.file?.location && req.file.location?.length > 0) {
       extra_params = { profile_image: req.file.location };
     }
 
@@ -111,41 +101,26 @@ userApp.post(
         msg: "Unsubscribed or subscription expired",
       });
     }
-
-    if (latitude && longitude) {
-      try {
-        await ModelIndividualUser.collection().updateOne(
-          { id },
-          {
-            $set: {
-              username,
-              email,
-              short_address,
-              updated: new Date(),
-              full_address,
-              vehicle_type,
-              vehicle_name,
-              coordinates: {
-                type: "Point",
-                coordinates: [parseFloat(longitude), parseFloat(latitude)],
-              },
-              ...extra_params,
-            },
+    try {
+      await ModelIndividualUser.collection().updateOne(
+        { id },
+        {
+          $set: {
+            ...req.body,
+            ...extra_params,
           },
-          { upsert: false }
-        );
-        return res.json({ status: "ok", msg: "Updated successfully" });
-      } catch (e) {
-        console.log(e);
-        return res.json({ status: "failed", msg: "Server error" });
-      }
-    } else {
-      return res.json({ status: "failed", msg: "Coordinates are missing" });
+        },
+        { upsert: false }
+      );
+      return res.json({ status: "ok", msg: "Updated successfully" });
+    } catch (e) {
+      console.log(e);
+      return res.json({ status: "failed", msg: "Server error" });
     }
   }
 );
 
-userApp.post("/local", authenticateToken, async (req, res) => {
+userApp.post("/local", async (req, res) => {
   const { lat, lng } = req.body;
   try {
     const data = await ModelIndividualUser.collection()
