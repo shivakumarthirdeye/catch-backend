@@ -58,13 +58,22 @@ generalApp.get("/user/:page", async (req, res) => {
             preserveNullAndEmptyArrays: true,
           },
         },
+        {
+          $lookup: {
+            from: "Vehicles",
+            localField: "vehicle_type",
+            foreignField: "id",
+            as: "vehicle_details",
+          },
+        },
+        {
+          $unwind: {
+            path: "$vehicle_details",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
       ])
       .toArray();
-    // .find(query)
-    // .sort({ created: -1 })
-    // .skip(skip)
-    // .limit(10)
-    // .toArray();
     return res.json({ status: "ok", data, total: count, count: data.length });
   } catch (e) {
     console.log(e);

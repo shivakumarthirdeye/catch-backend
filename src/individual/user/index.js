@@ -192,4 +192,16 @@ userApp.post(
   }
 );
 
+userApp.delete("/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  try {
+    await ModelIndividualUser.collection().deleteOne({ id });
+    return res.json({ staus: "ok", msg: "Deleted" });
+  } catch (e) {
+    console.log(e);
+    return res.json({ staus: "failed", msg: "Server error" });
+  }
+});
+
 export { userApp };
