@@ -14,6 +14,7 @@ userApp.use(express.json());
 const uploadProfile = multer({
   storage: multerS3({
     s3: s3,
+    acl: "public-read",
     bucket: process.env.AWS_S3_BUCKET_NAME,
     key: function (req, file, cb) {
       var newFileName = Date.now() + "-" + file.originalname;
@@ -26,6 +27,7 @@ const uploadProfile = multer({
 const uploadVehicle = multer({
   storage: multerS3({
     s3: s3,
+    acl: "public-read",
     bucket: process.env.AWS_S3_BUCKET_NAME,
     key: function (req, file, cb) {
       var newFileName = Date.now() + "-" + file.originalname;

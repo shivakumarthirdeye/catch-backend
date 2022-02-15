@@ -16,6 +16,7 @@ const uploadVehicle = multer({
   storage: multerS3({
     s3: s3,
     bucket: process.env.AWS_S3_BUCKET_NAME,
+    acl: "public-read",
     key: function (req, file, cb) {
       var newFileName = Date.now() + "-" + file.originalname;
       var fullPath = "vehicle/" + newFileName;
