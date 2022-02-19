@@ -123,7 +123,8 @@ userApp.post(
 );
 
 userApp.post("/local", async (req, res) => {
-  const { lat, lng } = req.body;
+  const { lat, lng, type } = req.body;
+  const query = type?.length > 0 ? { vehicle_type: type } : {};
   try {
     const data = await ModelIndividualUser.collection()
       .aggregate([
@@ -137,6 +138,7 @@ userApp.post("/local", async (req, res) => {
             distanceField: "dist.calculated",
             includeLocs: "dist.location",
             spherical: true,
+            query: query,
           },
         },
         {
