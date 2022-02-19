@@ -48,6 +48,7 @@ app.use((req, res) => {
 // global error handler
 app.use((err: any, req: any, res: any, next: any) => {
   if (res.headersSent) return next(err);
+  console.log(err);
   res.status(500).json({
     message: "500 server error",
     data: {

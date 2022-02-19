@@ -18,7 +18,7 @@ const uploadProfile = multer({
     bucket: process.env.AWS_S3_BUCKET_NAME,
     key: function (req, file, cb) {
       var newFileName = Date.now() + "-" + file.originalname;
-      var fullPath = "user/profile/" + newFileName;
+      var fullPath = "user/vehicle/" + newFileName;
       cb(null, fullPath); //use Date.now() for unique file keys
     },
   }),
@@ -164,7 +164,7 @@ userApp.post("/local", async (req, res) => {
 userApp.post(
   "/upload",
   authenticateToken,
-  uploadVehicle.array("vehicle_images"),
+  uploadVehicle.array("vehicle_images[]", 4),
   async (req, res) => {
     const id = req.user.id;
     const images = [];
@@ -187,9 +187,9 @@ userApp.post(
         },
         { upsert: false }
       );
-      return res.json({ staus: "ok", msg: "Uploaded" });
+      return res.json({ status: "ok", msg: "Uploaded" });
     } catch (e) {
-      return res.json({ staus: "failed", msg: "Server error" });
+      return res.json({ status: "failed", msg: "Server error" });
     }
   }
 );

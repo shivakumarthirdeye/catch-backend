@@ -19,7 +19,7 @@ const uploadVehicle = multer({
     acl: "public-read",
     key: function (req, file, cb) {
       var newFileName = Date.now() + "-" + file.originalname;
-      var fullPath = "vehicle/" + newFileName;
+      var fullPath = "user/vehicle/" + newFileName;
       cb(null, fullPath); //use Date.now() for unique file keys
     },
   }),
@@ -54,12 +54,19 @@ vehicleApp.post("/", uploadVehicle.single("image"), async (req, res) => {
 });
 
 vehicleApp.patch("/", uploadVehicle.single("image"), async (req, res) => {
-  const { name, color, id } = req.body;
-  const params = req.file?.location
-    ? req.file.location?.length > 0
-      ? { name, color, image: req.file.location }
-      : { name, color }
-    : { name, color };
+  const { name, color, id, status } = req.body;
+  let params = {};
+  // req.file?.location
+  //   ? req.file.location?.length > 0
+  //     ? { name, color, status, image: req.file.location }
+  //     : { name, color, status }
+  //   : { name, color, status };
+
+  if (req.file) {
+    params = { name, color, status, image: req.file.location };
+  } else {
+    params = { name, color, status };
+  }
   try {
     await ModelVehicles.collection().updateOne(
       { id },
