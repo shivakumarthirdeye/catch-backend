@@ -6,6 +6,7 @@ import generateAccessToken from "./authToken/tokens.js";
 import sendOtp from "../helper/sendOtp";
 import { ModelIndividualUser } from "../db-model/model.individual.users";
 import { ModelOtp } from "../db-model/model.otp";
+import { ModelSubscription } from "../db-model/model.subscription";
 require("dotenv").config();
 
 const authApp = express.Router();
@@ -48,7 +49,7 @@ authApp.post("/register", async (req, res) => {
         "https://firebasestorage.googleapis.com/v0/b/zhiffy-mobile-app.appspot.com/o/user.png?alt=media&token=a962c197-7147-40b7-93ae-cd924343cf58",
       updated: new Date(),
       is_verified: false,
-      status: "active",
+      status: "inactive",
       type: "driver",
       vehicle_type,
       status: "active",
@@ -101,6 +102,30 @@ authApp.post("/login", async (req, res) => {
   if (!user) {
     return res.json({ status: "failed", msg: "User not found" });
   }
+  const sub = await ModelSubscription.collection().findOne({
+    user_id: user.id,
+  });
+  if (sub.status == "active") {
+    await ModelIndividualUser.collection().updateOne(
+      { id: user.id },
+      {
+        $set: {
+          status: "active",
+        },
+      },
+      { upsert: false }
+    );
+  } else {
+    await ModelIndividualUser.collection().updateOne(
+      { id: user.id },
+      {
+        $set: {
+          status: "inactive",
+        },
+      },
+      { upsert: false }
+    );
+  }
 
   try {
     await ModelOtp.collection().updateOne(
@@ -118,7 +143,11 @@ authApp.post("/login", async (req, res) => {
 
     const val = await ModelOtp.collection().findOne({ phone, type: "login" });
     sendOtp({ otp: val.otp, phone: `+91${val.phone}` });
-    return res.send({ status: "ok", msg: "OTP sent successfully" });
+    return res.send({
+      status: "ok",
+      msg: "OTP sent successfully",
+      subscribed: sub.status == "active",
+    });
   } catch (e) {
     console.log(e);
     return res.send({ status: "failed", msg: "An error occured" });

@@ -124,7 +124,10 @@ userApp.post(
 
 userApp.post("/local", async (req, res) => {
   const { lat, lng, type } = req.body;
-  const query = type?.length > 0 ? { vehicle_type: type } : {};
+  const query =
+    type?.length > 0
+      ? { vehicle_type: type, status: "active" }
+      : { status: "active" };
   try {
     const data = await ModelIndividualUser.collection()
       .aggregate([
@@ -183,8 +186,8 @@ userApp.post(
       await ModelIndividualUser.collection().updateOne(
         { id },
         {
-          $set: {
-            vehicle_images: images,
+          $push: {
+            vehicle_images: { $each: images },
           },
         },
         { upsert: false }
@@ -205,6 +208,45 @@ userApp.delete("/:id", async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.json({ staus: "failed", msg: "Server error" });
+  }
+});
+
+userApp.post("/remove_img", authenticateToken, async (req, res) => {
+  const id = req.user.id;
+  const uri = req.body.uri;
+
+  try {
+    await ModelIndividualUser.collection().updateOne(
+      { id },
+      {
+        $pull: {
+          vehicle_images: { uri },
+        },
+      },
+      { upsert: false }
+    );
+    return res.json({ status: "ok", msg: "Removed" });
+  } catch (e) {
+    console.log(e);
+    return res.json({ status: "failed", msg: "Failed" });
+  }
+});
+
+userApp.post("/deactivate", authenticateToken, async (req, res) => {
+  const id = req.user.id;
+  try {
+    await ModelIndividualUser.collection().updateOne(
+      { id },
+      {
+        $set: {
+          status: "inactive",
+        },
+      }
+    );
+    return res.json({ status: "ok", msg: "Deactivated" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: "failed", msg: "Server error" });
   }
 });
 

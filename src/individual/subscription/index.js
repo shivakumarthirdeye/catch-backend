@@ -11,6 +11,8 @@ subApp.use(express.json());
 subApp.post("/", authenticateToken, async (req, res) => {
   const user_id = req.user.id;
   const type = req.body.type;
+  const status = req.body.status;
+  const payment_id = req.body.payment_id;
   const user = await ModelIndividualUser.collection().findOne({ id: user_id });
   if (!user) {
     return res.json({ status: "failed", msg: "User not found" });
@@ -34,9 +36,10 @@ subApp.post("/", authenticateToken, async (req, res) => {
         created: new Date(),
         paid: type == "monthly" ? 100 : 1000,
         user_id: user.id,
-        order_status: "successful",
-        status: "active",
+        order_status: status,
+        status: status == "successful" ? "active" : "inactive",
         updated: new Date(),
+        payment_id,
         expires:
           type == "monthly"
             ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)
