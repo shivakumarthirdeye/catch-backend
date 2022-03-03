@@ -77,7 +77,7 @@ authApp.post("/register", async (req, res) => {
     );
 
     const val = await ModelOtp.collection().findOne({ phone, type: "user" });
-    sendOtp({ otp: val.otp, phone: `+91${val.phone}` });
+    sendOtp({ otp: val.otp, phone: `${val.phone}` });
     return res.json({
       status: "ok",
       msg: "Registration Successfull",
@@ -142,7 +142,7 @@ authApp.post("/login", async (req, res) => {
     );
 
     const val = await ModelOtp.collection().findOne({ phone, type: "login" });
-    sendOtp({ otp: val.otp, phone: `+91${val.phone}` });
+    sendOtp({ otp: val.otp, phone: `${val.phone}` });
     return res.send({
       status: "ok",
       msg: "OTP sent successfully",
