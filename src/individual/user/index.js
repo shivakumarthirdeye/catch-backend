@@ -204,6 +204,7 @@ userApp.delete("/:id", async (req, res) => {
   console.log(id);
   try {
     await ModelIndividualUser.collection().deleteOne({ id });
+    await ModelSubscription.collection().deleteOne({ user_id: id });
     return res.json({ staus: "ok", msg: "Deleted" });
   } catch (e) {
     console.log(e);
