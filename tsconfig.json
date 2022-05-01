@@ -4,7 +4,7 @@
     "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "../catch-backend/build",
+    "outDir": "build",
     "rootDir": "./",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
