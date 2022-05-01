@@ -1,5 +1,4 @@
-/build
-/node_modules
+q/node_modules
 /tmp
 /upload
 *.map
