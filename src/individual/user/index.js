@@ -95,14 +95,14 @@ userApp.post(
       extra_params = { profile_image: req.file.location };
     }
 
-    const subs = await ModelSubscription.collection().findOne({ user_id: id });
+    //  const subs = await ModelSubscription.collection().findOne({ user_id: id });
 
-    if (!subs.status || subs.status != "active") {
-      return res.json({
-        status: "failed",
-        msg: "Unsubscribed or subscription expired",
-      });
-    }
+    // if (!subs.status || subs.status != "active") {
+    //   return res.json({
+    //     status: "failed",
+    //     msg: "Unsubscribed or subscription expired",
+    //   });
+    // }
     try {
       await ModelIndividualUser.collection().updateOne(
         { id },

@@ -43,7 +43,6 @@ authApp.post("/register", async (req, res) => {
             profile_image: "https://firebasestorage.googleapis.com/v0/b/zhiffy-mobile-app.appspot.com/o/user.png?alt=media&token=a962c197-7147-40b7-93ae-cd924343cf58",
             updated: new Date(),
             is_verified: false,
-            status: "inactive",
             type: "driver",
             vehicle_type,
             status: "active",

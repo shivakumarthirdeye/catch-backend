@@ -85,13 +85,13 @@ userApp.post("/edit", authenticate_1.default, uploadProfile.single("profile_imag
     if (((_a = req.file) === null || _a === void 0 ? void 0 : _a.location) && ((_b = req.file.location) === null || _b === void 0 ? void 0 : _b.length) > 0) {
         extra_params = { profile_image: req.file.location };
     }
-    const subs = await model_subscription_1.ModelSubscription.collection().findOne({ user_id: id });
-    if (!subs.status || subs.status != "active") {
-        return res.json({
-            status: "failed",
-            msg: "Unsubscribed or subscription expired",
-        });
-    }
+    //  const subs = await ModelSubscription.collection().findOne({ user_id: id });
+    // if (!subs.status || subs.status != "active") {
+    //   return res.json({
+    //     status: "failed",
+    //     msg: "Unsubscribed or subscription expired",
+    //   });
+    // }
     try {
         await model_individual_users_1.ModelIndividualUser.collection().updateOne({ id }, {
             $set: Object.assign(Object.assign({}, req.body), extra_params),
