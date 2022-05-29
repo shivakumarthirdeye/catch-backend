@@ -95,14 +95,6 @@ userApp.post(
       extra_params = { profile_image: req.file.location };
     }
 
-    //  const subs = await ModelSubscription.collection().findOne({ user_id: id });
-
-    // if (!subs.status || subs.status != "active") {
-    //   return res.json({
-    //     status: "failed",
-    //     msg: "Unsubscribed or subscription expired",
-    //   });
-    // }
     try {
       await ModelIndividualUser.collection().updateOne(
         { id },
@@ -121,6 +113,46 @@ userApp.post(
     }
   }
 );
+
+// userApp.post(
+//   "/edit",
+//   authenticateToken,
+//   uploadProfile.single("profile_image"),
+//   async (req, res) => {
+//     const id = req.user.id;
+
+//     let extra_params = {};
+
+//     if (req.file?.location && req.file.location?.length > 0) {
+//       extra_params = { profile_image: req.file.location };
+//     }
+
+//     //  const subs = await ModelSubscription.collection().findOne({ user_id: id });
+
+//     // if (!subs.status || subs.status != "active") {
+//     //   return res.json({
+//     //     status: "failed",
+//     //     msg: "Unsubscribed or subscription expired",
+//     //   });
+//     // }
+//     try {
+//       await ModelIndividualUser.collection().updateOne(
+//         { id },
+//         {
+//           $set: {
+//             ...req.body,
+//             ...extra_params,
+//           },
+//         },
+//         { upsert: false }
+//       );
+//       return res.json({ status: "ok", msg: "Updated successfully" });
+//     } catch (e) {
+//       console.log(e);
+//       return res.json({ status: "failed", msg: "Server error" });
+//     }
+//   }
+// );
 
 userApp.post("/local", async (req, res) => {
   const { lat, lng, type } = req.body;
