@@ -2,8 +2,8 @@
   "name": "catch_backend",
   "version": "1.0.0",
   "description": "",
-  "main": "./build/src/main.js",
   "scripts": {
+    "start": "node ./build/src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "lcl": "cross-env NODE_ENV=development nodemon --watch './**/*.ts' --exec 'ts-node' ./src/main.ts",
