@@ -2,11 +2,10 @@
   "name": "catch_backend",
   "version": "1.0.0",
   "description": "",
-  "main": "/src/main.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
-    "lcl": "cross-env NODE_ENV=development nodemon --watch './**/*.ts' --exec 'ts-node' ./src/main.ts",
+    "start": "cross-env NODE_ENV=development nodemon --watch './**/*.ts' --exec 'ts-node' ./src/main.ts",
     "prod": "cross-env NODE_OPTIONS='--max-old-space-size=1024' && cross-env NODE_ENV=production nodemon --watch './**/*.ts' --exec 'ts-node' ./src/main.ts",
     "dev": "npm run build && cross-env NODE_ENV='local' && node .",
     "start:prod": "cross-env NODE_OPTIONS='--max-old-space-size=1024' && cross-env NODE_ENV=production npm run build && pm2 start --env production",
