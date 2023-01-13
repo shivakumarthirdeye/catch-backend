@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { appIndividual } from './individual';
 import { Database } from './shared/database';
 import { loggerRoot } from './shared/logger';
+import morgan from 'morgan';
 import cors from 'cors';
 import path from 'path';
 import job from './cron';
@@ -26,7 +27,7 @@ database
     loggerRoot.error(err.message);
     process.exit(0);
   });
-
+app.use(morgan());
 app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use('/api/', appIndividual);

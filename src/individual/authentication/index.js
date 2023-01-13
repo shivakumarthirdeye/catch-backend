@@ -1,13 +1,13 @@
-import express from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import authenticateToken from "../middleware/authenticate";
-import generateAccessToken from "./authToken/tokens.js";
-import sendOtp from "../helper/sendOtp";
-import { ModelIndividualUser } from "../db-model/model.individual.users";
-import { ModelOtp } from "../db-model/model.otp";
-import { ModelSubscription } from "../db-model/model.subscription";
-require("dotenv").config();
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import authenticateToken from '../middleware/authenticate';
+import generateAccessToken from './authToken/tokens.js';
+import sendOtp from '../helper/sendOtp';
+import { ModelIndividualUser } from '../db-model/model.individual.users';
+import { ModelOtp } from '../db-model/model.otp';
+import { ModelSubscription } from '../db-model/model.subscription';
+require('dotenv').config();
 
 const authApp = express.Router();
 
@@ -15,28 +15,28 @@ authApp.use(express.json());
 
 // API for registering user in Individual app
 
-authApp.post("/register", async (req, res) => {
+authApp.post('/register', async (req, res) => {
   const { username, phone, vehicle_type } = req.body;
 
   if (!vehicle_type) {
     return res.json({
-      status: "failed",
-      msg: "Please specify a valid vehicle type",
+      status: 'failed',
+      msg: 'Please specify a valid vehicle type',
     });
   }
 
-  if (!username || typeof username !== "string") {
-    return res.json({ status: "failed", msg: "Invalid Username" });
+  if (!username || typeof username !== 'string') {
+    return res.json({ status: 'failed', msg: 'Invalid Username' });
   }
 
-  if (!phone || typeof phone !== "string" || phone.length != 10) {
-    return res.json({ status: "failed", msg: "Invalid Mobile Number" });
+  if (!phone || typeof phone !== 'string' || phone.length != 10) {
+    return res.json({ status: 'failed', msg: 'Invalid Mobile Number' });
   }
 
   if (
     (await ModelIndividualUser.collection().findOne({ phone })) != undefined
   ) {
-    return res.json({ status: "failed", msg: "Mobile number already exists" });
+    return res.json({ status: 'failed', msg: 'Mobile number already exists' });
   }
 
   try {
@@ -46,18 +46,18 @@ authApp.post("/register", async (req, res) => {
       created: new Date(),
       phone,
       profile_image:
-        "https://firebasestorage.googleapis.com/v0/b/zhiffy-mobile-app.appspot.com/o/user.png?alt=media&token=a962c197-7147-40b7-93ae-cd924343cf58",
+        'https://firebasestorage.googleapis.com/v0/b/zhiffy-mobile-app.appspot.com/o/user.png?alt=media&token=a962c197-7147-40b7-93ae-cd924343cf58',
       updated: new Date(),
       is_verified: false,
-      type: "driver",
+      type: 'driver',
       vehicle_type,
-      status: "active",
-      full_address: "",
-      short_address: "",
-      vehicle_name: "",
+      status: 'active',
+      full_address: '',
+      short_address: '',
+      vehicle_name: '',
       vehicle_images: [],
       coordinates: {
-        type: "Point",
+        type: 'Point',
         coordinates: [26.0, 76.0],
       },
     });
@@ -68,111 +68,115 @@ authApp.post("/register", async (req, res) => {
         $set: {
           otp: Math.floor(1000 + Math.random() * 9000),
           phone,
-          type: "user",
+          type: 'user',
           expire: new Date(Date.now() + 10 * 60 * 1000),
         },
       },
       { upsert: true }
     );
 
-    const val = await ModelOtp.collection().findOne({ phone, type: "user" });
+    const val = await ModelOtp.collection().findOne({ phone, type: 'user' });
     sendOtp({ otp: val.otp, phone: `${val.phone}` });
     return res.json({
-      status: "ok",
-      msg: "Registration Successfull",
+      status: 'ok',
+      msg: 'Registration Successfull',
     });
   } catch (e) {
     console.log(e);
-    return res.json({ status: "failed", msg: "Server Error", e });
+    return res.json({ status: 'failed', msg: 'Server Error', e });
   }
 });
 
 // API for logging in user in Individual app
 
-authApp.post("/login", async (req, res) => {
+authApp.post('/login', async (req, res) => {
   const { phone } = req.body;
 
-  if (!phone || typeof phone !== "string") {
-    return res.json({ status: "failed", msg: "Invalid Mobile number" });
+  if (!phone || typeof phone !== 'string') {
+    return res.json({ status: 'failed', msg: 'Invalid Mobile number' });
   }
 
   const user = await ModelIndividualUser.collection().findOne({ phone });
 
   if (!user) {
-    return res.json({ status: "failed", msg: "User not found" });
+    return res.json({ status: 'failed', msg: 'User not found' });
   }
-  const sub = await ModelSubscription.collection().findOne({
-    user_id: user.id,
-  });
-  if (sub.status == "active") {
-    await ModelIndividualUser.collection().updateOne(
-      { id: user.id },
-      {
-        $set: {
-          status: "active",
-        },
-      },
-      { upsert: false }
-    );
-  } else {
-    await ModelIndividualUser.collection().updateOne(
-      { id: user.id },
-      {
-        $set: {
-          status: "inactive",
-        },
-      },
-      { upsert: false }
-    );
-  }
+
+  // const sub = await ModelSubscription.collection().findOne({
+  //   user_id: user.id,
+  // });
+  // if (sub?.status == 'active') {
+  //   await ModelIndividualUser.collection().updateOne(
+  //     { id: user.id },
+  //     {
+  //       $set: {
+  //         status: 'active',
+  //       },
+  //     },
+  //     { upsert: false }
+  //   );
+  // } else {
+  //   await ModelIndividualUser.collection().updateOne(
+  //     { id: user.id },
+  //     {
+  //       $set: {
+  //         status: 'inactive',
+  //       },
+  //     },
+  //     { upsert: false }
+  //   );
+  // }
 
   try {
     await ModelOtp.collection().updateOne(
       { phone },
       {
         $set: {
-          otp: Math.floor(1000 + Math.random() * 9000),
+          otp: (Math.floor(Math.random() * 10000) + 10000)
+            .toString()
+            .substring(1),
           phone,
-          type: "login",
+          type: 'login',
           expire: new Date(Date.now() + 10 * 60 * 1000),
         },
       },
       { upsert: true }
     );
 
-    const val = await ModelOtp.collection().findOne({ phone, type: "login" });
+    const val = await ModelOtp.collection().findOne({ phone, type: 'login' });
+    console.log('🚀 ~ file: index.js:147 ~ authApp.post ~ val', val);
     sendOtp({ otp: val.otp, phone: `${val.phone}` });
     return res.send({
-      status: "ok",
-      msg: "OTP sent successfully",
-      subscribed: sub.status == "active",
+      status: 'ok',
+      msg: 'OTP sent successfully',
+      // subscribed: sub.status == 'active',
     });
   } catch (e) {
     console.log(e);
-    return res.send({ status: "failed", msg: "An error occured" });
+    return res.send({ status: 'failed', msg: 'An error occured' });
   }
 });
 
-authApp.post("/verify_login", async (req, res) => {
+authApp.post('/verify_login', async (req, res) => {
   const { otp, phone } = req.body;
 
-  if (!otp || typeof otp !== "string") {
-    return res.json({ status: "failed", msg: "Missing OTP" });
+  if (!otp || typeof otp !== 'string') {
+    return res.json({ status: 'failed', msg: 'Missing OTP' });
   }
 
-  if (!phone || typeof phone !== "string") {
-    return res.json({ status: "failed", msg: "Missing mobile number" });
+  if (!phone || typeof phone !== 'string') {
+    return res.json({ status: 'failed', msg: 'Missing mobile number' });
   }
 
-  const val = await ModelOtp.collection().findOne({ phone, type: "login" });
+  const val = await ModelOtp.collection().findOne({ phone, type: 'login' });
 
   if (val == null) {
-    return res.json({ status: "failed", msg: "Invalid request" });
+    return res.json({ status: 'failed', msg: 'Invalid request' });
   }
 
   if (
     val.otp == otp ||
-    (otp == "0000" && val.expire.getTime() > new Date().getTime())
+    (otp == '0000' && val.expire.getTime() > new Date().getTime())
   ) {
     //if (otp == '0000' ||  && val.expire.getTime() > new Date().getTime()) {
 
@@ -188,8 +192,8 @@ authApp.post("/verify_login", async (req, res) => {
           process.env.REFRESH_TOKEN_SECRET
         );
         return res.json({
-          status: "ok",
-          msg: "Logged in successfully.",
+          status: 'ok',
+          msg: 'Logged in successfully.',
           data: {
             access_token,
             refresh_token,
@@ -198,39 +202,39 @@ authApp.post("/verify_login", async (req, res) => {
           },
         });
       } else {
-        return res.json({ status: "failed", msg: "No user found" });
+        return res.json({ status: 'failed', msg: 'No user found' });
       }
     } catch (err) {
       console.log(err);
-      return res.json({ status: "failed", msg: "Server error" });
+      return res.json({ status: 'failed', msg: 'Server error' });
     }
   }
 
-  return res.json({ status: "failed", msg: "OTP expired, please try again" });
+  return res.json({ status: 'failed', msg: 'OTP expired, please try again' });
 });
 
 // API for verifing OTP in Individual app
 
-authApp.post("/verify", async (req, res) => {
+authApp.post('/verify', async (req, res) => {
   const { otp, phone } = req.body;
 
-  if (!otp || typeof otp !== "string") {
-    return res.json({ status: "failed", msg: "Missing OTP" });
+  if (!otp || typeof otp !== 'string') {
+    return res.json({ status: 'failed', msg: 'Missing OTP' });
   }
 
-  if (!phone || typeof phone !== "string") {
-    return res.json({ status: "failed", msg: "Missing mobile number" });
+  if (!phone || typeof phone !== 'string') {
+    return res.json({ status: 'failed', msg: 'Missing mobile number' });
   }
 
-  const val = await ModelOtp.collection().findOne({ phone, type: "user" });
+  const val = await ModelOtp.collection().findOne({ phone, type: 'user' });
 
   if (val == null) {
-    return res.json({ status: "failed", msg: "Invalid request" });
+    return res.json({ status: 'failed', msg: 'Invalid request' });
   }
 
   if (
     val.otp == otp ||
-    (otp == "0000" && val.expire.getTime() > new Date().getTime())
+    (otp == '0000' && val.expire.getTime() > new Date().getTime())
   ) {
     try {
       await ModelIndividualUser.collection().updateOne(
@@ -253,36 +257,36 @@ authApp.post("/verify", async (req, res) => {
         process.env.REFRESH_TOKEN_SECRET
       );
       return res.json({
-        status: "ok",
-        msg: "Verification Successfull",
+        status: 'ok',
+        msg: 'Verification Successfull',
         data: { access_token, refresh_token, id: user_data.id },
       });
     } catch (err) {
-      return res.json({ status: "failed", msg: "Server error" });
+      return res.json({ status: 'failed', msg: 'Server error' });
     }
   }
 
-  return res.json({ status: "failed", msg: "OTP expired, please try again" });
+  return res.json({ status: 'failed', msg: 'OTP expired, please try again' });
 });
 
 // API for verifing JWT in Individual app
 
-authApp.get("/validate", authenticateToken, (req, res) => {
-  return res.json({ status: "ok", msg: "Verified", user: req.user });
+authApp.get('/validate', authenticateToken, (req, res) => {
+  return res.json({ status: 'ok', msg: 'Verified', user: req.user });
 });
 
 // API for refreshing JWT in Individual app
 
-authApp.post("/refresh", (req, res) => {
+authApp.post('/refresh', (req, res) => {
   const { refresh_token } = req.body;
 
   if (refresh_token == null) {
-    return res.json({ status: "failed", msg: "Refresh token not present" });
+    return res.json({ status: 'failed', msg: 'Refresh token not present' });
   }
 
   jwt.verify(refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.json({ status: "failed", msg: "Invalid token" });
+      return res.json({ status: 'failed', msg: 'Invalid token' });
     }
 
     const access_token = generateAccessToken({
@@ -290,25 +294,25 @@ authApp.post("/refresh", (req, res) => {
       username: user.username,
     });
 
-    return res.json({ status: "ok", msg: "Token Generated", access_token });
+    return res.json({ status: 'ok', msg: 'Token Generated', access_token });
   });
 });
 
 // API for resending OTP in Individual app
 
-authApp.post("/resend", async (req, res) => {
+authApp.post('/resend', async (req, res) => {
   const { phone } = req.body;
 
   if (!phone) {
-    return res.json({ status: "failed", msg: "Mobile number not present" });
+    return res.json({ status: 'failed', msg: 'Mobile number not present' });
   }
 
-  const val = await ModelOtp.collection().findOne({ phone, type: "user" });
+  const val = await ModelOtp.collection().findOne({ phone, type: 'user' });
 
   if (val == null) {
     return res.json({
-      status: "failed",
-      msg: "An error occured, Please try again",
+      status: 'failed',
+      msg: 'An error occured, Please try again',
     });
   }
 
@@ -316,7 +320,7 @@ authApp.post("/resend", async (req, res) => {
 
   try {
     await ModelOtp.collection().updateOne(
-      { phone, type: "user" },
+      { phone, type: 'user' },
       {
         $set: { expire: new Date(Date.now() + 10 * 60 * 1000) },
       }
@@ -324,27 +328,27 @@ authApp.post("/resend", async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.json({
-      status: "failed",
-      msg: "An error occured, Please try again",
+      status: 'failed',
+      msg: 'An error occured, Please try again',
     });
   }
 
-  return res.json({ status: "ok", msg: "OTP sent succesfully" });
+  return res.json({ status: 'ok', msg: 'OTP sent succesfully' });
 });
 
-authApp.post("/resend_login", async (req, res) => {
+authApp.post('/resend_login', async (req, res) => {
   const { phone } = req.body;
 
   if (!phone) {
-    return res.json({ status: "failed", msg: "Mobile number not present" });
+    return res.json({ status: 'failed', msg: 'Mobile number not present' });
   }
 
-  const val = await ModelOtp.collection().findOne({ phone, type: "user" });
+  const val = await ModelOtp.collection().findOne({ phone, type: 'user' });
 
   if (val == null) {
     return res.json({
-      status: "failed",
-      msg: "An error occured, Please try again",
+      status: 'failed',
+      msg: 'An error occured, Please try again',
     });
   }
 
@@ -352,7 +356,7 @@ authApp.post("/resend_login", async (req, res) => {
 
   try {
     await ModelOtp.collection().updateOne(
-      { phone, type: "login" },
+      { phone, type: 'login' },
       {
         $set: { expire: new Date(Date.now() + 10 * 60 * 1000) },
       }
@@ -360,24 +364,24 @@ authApp.post("/resend_login", async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.json({
-      status: "failed",
-      msg: "An error occured, Please try again",
+      status: 'failed',
+      msg: 'An error occured, Please try again',
     });
   }
 
-  return res.json({ status: "ok", msg: "OTP sent succesfully" });
+  return res.json({ status: 'ok', msg: 'OTP sent succesfully' });
 });
 
 // API for google sign_up/sign_in
 
-authApp.post("/change_no", authenticateToken, async (req, res) => {
+authApp.post('/change_no', authenticateToken, async (req, res) => {
   const { phone, updated_phone } = req.body;
 
   try {
     if (
       (await ModelIndividualUser.collection().findOne({ phone })) == undefined
     ) {
-      return res.json({ status: "failed", msg: "User doesn't exists exists" });
+      return res.json({ status: 'failed', msg: "User doesn't exists exists" });
     }
 
     if (
@@ -386,8 +390,8 @@ authApp.post("/change_no", authenticateToken, async (req, res) => {
       })) != undefined
     ) {
       return res.json({
-        status: "failed",
-        msg: "Mobile number already exists",
+        status: 'failed',
+        msg: 'Mobile number already exists',
       });
     }
 
@@ -403,12 +407,12 @@ authApp.post("/change_no", authenticateToken, async (req, res) => {
     );
 
     await ModelOtp.collection().updateOne(
-      { phone: updated_phone, type: "user" },
+      { phone: updated_phone, type: 'user' },
       {
         $set: {
           otp: Math.floor(1000 + Math.random() * 9000),
           phone: updated_phone,
-          type: "user",
+          type: 'user',
           expire: new Date(Date.now() + 10 * 60 * 1000),
         },
       },
@@ -417,17 +421,17 @@ authApp.post("/change_no", authenticateToken, async (req, res) => {
 
     const val = await ModelOtp.collection().findOne({
       phone: updated_phone,
-      type: "user",
+      type: 'user',
     });
     sendOtp({ otp: val.otp, phone: `+91${val.phone}` });
 
     return res.send({
-      status: "ok",
-      msg: "Mobile number changed successfully",
+      status: 'ok',
+      msg: 'Mobile number changed successfully',
     });
   } catch (e) {
     console.log(e);
-    return res.send({ status: "failed", msg: "Server error" });
+    return res.send({ status: 'failed', msg: 'Server error' });
   }
 });
 
