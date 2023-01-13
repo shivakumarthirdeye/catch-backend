@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'catch_api',
-      script: './src/main.js',
+      script: '/build/src/main.js',
       exec_mode: 'cluster',
       instances: 1,
       env: {
