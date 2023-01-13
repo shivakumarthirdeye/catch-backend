@@ -148,7 +148,7 @@ authApp.post('/login', async (req, res) => {
     return res.send({
       status: 'ok',
       msg: 'OTP sent successfully',
-      subscribed: sub.status == 'active',
+      //   subscribed: sub.status == 'active',
     });
   } catch (e) {
     console.log(e);

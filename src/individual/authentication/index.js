@@ -144,7 +144,6 @@ authApp.post('/login', async (req, res) => {
     );
 
     const val = await ModelOtp.collection().findOne({ phone, type: 'login' });
-    console.log('🚀 ~ file: index.js:147 ~ authApp.post ~ val', val);
     sendOtp({ otp: val.otp, phone: `${val.phone}` });
     return res.send({
       status: 'ok',
