@@ -27,7 +27,7 @@ database
     loggerRoot.error(err.message);
     process.exit(0);
   });
-app.use(morgan());
+app.use(morgan('dev'));
 app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use('/api/', appIndividual);
